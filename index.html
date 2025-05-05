@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>3進数デイタイマー</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s, color 0.3s;
+      font-family: sans-serif;
+    }
+
+    body.dark {
+      background: #111;
+      color: #0f0;
+    }
+
+    body.light {
+      background: #fefefe;
+      color: #222;
+    }
+
+    #clock {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      grid-template-rows: repeat(4, 60px);
+      gap: 10px;
+      place-items: center;
+    }
+
+    .dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: gray;
+      transition: background-color 0.3s;
+    }
+
+    /* ダークモードの色設定 */
+    body.dark .dot[data-value="0"] { background-color: black; }
+    body.dark .dot[data-value="1"] { background-color: green; }
+    body.dark .dot[data-value="2"] { background-color: blue; }
+
+    /* ライトモードの色設定 */
+    body.light .dot[data-value="0"] { background-color: white; }
+    body.light .dot[data-value="1"] { background-color: red; }
+    body.light .dot[data-value="2"] { background-color: blue; }
+
+    #themeToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 0.5em 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    body.dark #themeToggle {
+      background-color: #333;
+      color: #ccc;
+    }
+
+    body.light #themeToggle {
+      background-color: #ddd;
+      color: #000;
+    }
+  </style>
+</head>
+<body class="dark">
+  <div id="clock">
+    <!-- 1-2-3-4ピラミッド状に並べる -->
+    <div style="grid-column: 2;"></div>
+    <div class="dot" id="dot0" style="grid-column: 2;"></div>
+    <div class="dot" id="dot1" style="grid-column: 1;"></div>
+    <div class="dot" id="dot2" style="grid-column: 3;"></div>
+    <div class="dot" id="dot3" style="grid-column: 1;"></div>
+    <div class="dot" id="dot4" style="grid-column: 2;"></div>
+    <div class="dot" id="dot5" style="grid-column: 3;"></div>
+    <div class="dot" id="dot6" style="grid-column: 4;"></div>
+    <div class="dot" id="dot7" style="grid-column: 1;"></div>
+    <div class="dot" id="dot8" style="grid-column: 2;"></div>
+    <div class="dot" id="dot9" style="grid-column: 3;"></div>
+    <div></div>
+  </div>
+
+  <button id="themeToggle">ライトテーマに切り替え</button>
+
+  <script>
+    const dotIds = Array.from({ length: 10 }, (_, i) => document.getElementById(`dot${i}`));
+
+    function updateClock() {
+      const now = new Date();
+      const secondsSinceMidnight =
+        now.getHours() * 3600 +
+        now.getMinutes() * 60 +
+        now.getSeconds() +
+        now.getMilliseconds() / 1000;
+
+      const totalSteps = 59049; // 3^10
+      const currentStep = Math.floor((secondsSinceMidnight / 86400) * totalSteps);
+      const ternary = currentStep.toString(3).padStart(10, "0");
+
+      for (let i = 0; i < 10; i++) {
+        dotIds[i].setAttribute("data-value", ternary[i]);
+      }
+    }
+
+    setInterval(updateClock, 100);
+    updateClock();
+
+    const body = document.body;
+    const toggleButton = document.getElementById("themeToggle");
+
+    toggleButton.addEventListener("click", () => {
+      const isDark = body.classList.contains("dark");
+      body.classList.toggle("dark", !isDark);
+      body.classList.toggle("light", isDark);
+      toggleButton.textContent = isDark
+        ? "ダークテーマに切り替え"
+        : "ライトテーマに切り替え";
+    });
+  </script>
+</body>
+</html>
