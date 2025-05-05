@@ -2,8 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>三角形タイル時計</title>
+  <title>3進数時計</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       height: 100vh;
@@ -16,38 +20,53 @@
 
     body.dark {
       background: #111;
-      color: #0f0;
+      color: #ccc;
     }
 
     body.light {
-      background: #fefefe;
-      color: #222;
+      background: #fafafa;
+      color: #111;
     }
 
-    #triangle {
-      position: relative;
-      width: 200px;
-      height: 180px;
+    #tileClock {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-template-rows: repeat(2, 60px);
+      gap: 8px;
     }
 
     .tile {
-      width: 40px;
-      height: 40px;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      position: absolute;
-      background-color: gray;
-      transition: background-color 0.3s;
+      width: 0;
+      height: 0;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-bottom: 52px solid black;
+      transition: border-color 0.3s;
     }
 
-    /* 色設定（ダーク） */
-    body.dark .tile[data-value="0"] { background-color: black; }
-    body.dark .tile[data-value="1"] { background-color: green; }
-    body.dark .tile[data-value="2"] { background-color: blue; }
+    body.dark .tile.val0 {
+      border-bottom-color: black;
+    }
 
-    /* 色設定（ライト） */
-    body.light .tile[data-value="0"] { background-color: white; }
-    body.light .tile[data-value="1"] { background-color: red; }
-    body.light .tile[data-value="2"] { background-color: blue; }
+    body.dark .tile.val1 {
+      border-bottom-color: green;
+    }
+
+    body.dark .tile.val2 {
+      border-bottom-color: blue;
+    }
+
+    body.light .tile.val0 {
+      border-bottom-color: white;
+    }
+
+    body.light .tile.val1 {
+      border-bottom-color: red;
+    }
+
+    body.light .tile.val2 {
+      border-bottom-color: blue;
+    }
 
     #themeToggle {
       position: absolute;
@@ -57,44 +76,44 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s, color 0.3s;
     }
 
     body.dark #themeToggle {
-      background-color: #333;
+      background: #444;
       color: #ccc;
     }
 
     body.light #themeToggle {
-      background-color: #ddd;
-      color: #000;
+      background: #ddd;
+      color: #111;
+    }
+
+    #themeToggle:hover {
+      opacity: 0.8;
     }
   </style>
 </head>
 <body class="dark">
-  <div id="triangle">
-    <!-- タイル10個 -->
-    <!-- 1段 -->
-    <div class="tile" id="tile0" style="top: 0px; left: 80px;"></div>
-    <!-- 2段 -->
-    <div class="tile" id="tile1" style="top: 45px; left: 60px;"></div>
-    <div class="tile" id="tile2" style="top: 45px; left: 100px;"></div>
-    <!-- 3段 -->
-    <div class="tile" id="tile3" style="top: 90px; left: 40px;"></div>
-    <div class="tile" id="tile4" style="top: 90px; left: 80px;"></div>
-    <div class="tile" id="tile5" style="top: 90px; left: 120px;"></div>
-    <!-- 4段 -->
-    <div class="tile" id="tile6" style="top: 135px; left: 20px;"></div>
-    <div class="tile" id="tile7" style="top: 135px; left: 60px;"></div>
-    <div class="tile" id="tile8" style="top: 135px; left: 100px;"></div>
-    <div class="tile" id="tile9" style="top: 135px; left: 140px;"></div>
+  <div id="tileClock">
+    <!-- 10 tiles will be inserted here -->
   </div>
-
   <button id="themeToggle">ライトテーマに切り替え</button>
 
   <script>
-    const tiles = Array.from({ length: 10 }, (_, i) => document.getElementById(`tile${i}`));
+    const tileClock = document.getElementById("tileClock");
 
-    function updateTiles() {
+    // タイルを10個生成
+    for (let i = 0; i < 10; i++) {
+      const tile = document.createElement("div");
+      tile.classList.add("tile", "val0");
+      tileClock.appendChild(tile);
+    }
+
+    const tiles = Array.from(tileClock.children);
+
+    function updateClock() {
       const now = new Date();
       const seconds =
         now.getHours() * 3600 +
@@ -102,20 +121,26 @@
         now.getSeconds() +
         now.getMilliseconds() / 1000;
 
-      const maxSteps = Math.pow(3, 10); // 59049
-      const currentStep = Math.floor((seconds / 86400) * maxSteps);
-      const ternary = currentStep.toString(3).padStart(10, '0');
+      const totalParts = Math.pow(3, 10); // 59049
+      const index = Math.floor((seconds / 86400) * totalParts);
 
-      for (let i = 0; i < 10; i++) {
-        tiles[i].setAttribute("data-value", ternary[i]);
-      }
+      // 3進数に変換して10桁にする
+      const ternary = index.toString(3).padStart(10, "0");
+
+      // タイルの色を更新
+      tiles.forEach((tile, i) => {
+        tile.classList.remove("val0", "val1", "val2");
+        tile.classList.add("val" + ternary[i]);
+      });
     }
 
-    setInterval(updateTiles, 100);
-    updateTiles();
+    setInterval(updateClock, 100);
+    updateClock();
 
+    // テーマ切り替え
     const body = document.body;
     const toggleButton = document.getElementById("themeToggle");
+
     toggleButton.addEventListener("click", () => {
       const isDark = body.classList.contains("dark");
       body.classList.toggle("dark", !isDark);
