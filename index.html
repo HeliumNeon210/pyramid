@@ -26,11 +26,16 @@
     }
 
     #clock {
-      display: grid;
-      grid-template-columns: repeat(4, 60px);
-      grid-template-rows: repeat(4, 60px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 10px;
-      place-items: center;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
 
     .dot {
@@ -41,12 +46,12 @@
       transition: background-color 0.3s;
     }
 
-    /* ダークモードの色設定 */
+    /* ダークモード色 */
     body.dark .dot[data-value="0"] { background-color: black; }
     body.dark .dot[data-value="1"] { background-color: green; }
     body.dark .dot[data-value="2"] { background-color: blue; }
 
-    /* ライトモードの色設定 */
+    /* ライトモード色 */
     body.light .dot[data-value="0"] { background-color: white; }
     body.light .dot[data-value="1"] { background-color: red; }
     body.light .dot[data-value="2"] { background-color: blue; }
@@ -74,25 +79,28 @@
 </head>
 <body class="dark">
   <div id="clock">
-    <!-- 1-2-3-4ピラミッド状に並べる -->
-    <div style="grid-column: 2;"></div>
-    <div class="dot" id="dot0" style="grid-column: 2;"></div>
-    <div class="dot" id="dot1" style="grid-column: 1;"></div>
-    <div class="dot" id="dot2" style="grid-column: 3;"></div>
-    <div class="dot" id="dot3" style="grid-column: 1;"></div>
-    <div class="dot" id="dot4" style="grid-column: 2;"></div>
-    <div class="dot" id="dot5" style="grid-column: 3;"></div>
-    <div class="dot" id="dot6" style="grid-column: 4;"></div>
-    <div class="dot" id="dot7" style="grid-column: 1;"></div>
-    <div class="dot" id="dot8" style="grid-column: 2;"></div>
-    <div class="dot" id="dot9" style="grid-column: 3;"></div>
-    <div></div>
+    <div class="row"><div class="dot" id="dot0"></div></div>
+    <div class="row">
+      <div class="dot" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+    </div>
+    <div class="row">
+      <div class="dot" id="dot3"></div>
+      <div class="dot" id="dot4"></div>
+      <div class="dot" id="dot5"></div>
+    </div>
+    <div class="row">
+      <div class="dot" id="dot6"></div>
+      <div class="dot" id="dot7"></div>
+      <div class="dot" id="dot8"></div>
+      <div class="dot" id="dot9"></div>
+    </div>
   </div>
 
   <button id="themeToggle">ライトテーマに切り替え</button>
 
   <script>
-    const dotIds = Array.from({ length: 10 }, (_, i) => document.getElementById(`dot${i}`));
+    const dots = Array.from({ length: 10 }, (_, i) => document.getElementById(`dot${i}`));
 
     function updateClock() {
       const now = new Date();
@@ -107,7 +115,7 @@
       const ternary = currentStep.toString(3).padStart(10, "0");
 
       for (let i = 0; i < 10; i++) {
-        dotIds[i].setAttribute("data-value", ternary[i]);
+        dots[i].setAttribute("data-value", ternary[i]);
       }
     }
 
